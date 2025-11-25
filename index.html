@@ -1,150 +1,67 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Versets Bibliques — Auto</title>
-  <meta name="description" content="Site gratuit qui affiche des versets bibliques aléatoires et les fait tourner automatiquement." />
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8;--glass: rgba(255,255,255,0.04)}
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;
-      background:linear-gradient(180deg,#071025 0%, #081024 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:32px
-    }
-    .wrap{max-width:900px;width:100%;}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}    
-    h1{margin:0 0 8px;font-size:20px;letter-spacing:0.2px}
-    .quote-box{min-height:140px;display:flex;flex-direction:column;gap:12px;justify-content:center;padding:18px;border-radius:12px;background:var(--glass);}    
-    .quote{font-size:20px;line-height:1.4;margin:0;text-align:center}
-    .author{font-size:14px;color:var(--muted);text-align:center}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-    button.primary{background:linear-gradient(90deg,var(--accent),#4f46e5);border:0;color:white}
-    .small{font-size:13px;padding:8px 10px}
-    .meta{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:12px;color:var(--muted);font-size:13px}
-    .settings{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-    input[type=range]{width:160px}
-    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-    @media(min-width:720px){ .quote{font-size:24px} }
-    .fade-enter{opacity:0;transform:translateY(6px)}
-    .fade-enter-active{transition:opacity .35s ease, transform .35s ease;opacity:1;transform:none}
-    .fade-exit{opacity:1}
-    .fade-exit-active{opacity:0}
-  </style>
+<meta charset="UTF-8">
+<title>Verset Biblique du Jour</title>
+<style>
+    body { font-family: Arial; text-align: center; padding: 20px; background: #f7f7f7; }
+    #verset-box { background: white; padding: 20px; border-radius: 10px; margin-top: 30px; }
+    button { padding: 12px 20px; margin: 10px; border: none; background: #3498db; color: white; border-radius: 5px; cursor: pointer; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Versets Bibliques — automatique</h1>
-      <div class="quote-box" id="quoteBox" aria-live="polite">
-        <p class="quote" id="quoteText">Chargement...</p>
-        <p class="author" id="quoteAuthor"></p>
-      </div>
 
-      <div class="controls">
-        <button id="whatsappBtn" class="small">WhatsApp</button>
-        <button id="newBtn" class="primary">Nouveau verset</button>
-        <button id="pauseBtn" class="small">Pause</button>
-        <button id="copyBtn" class="small">Copier</button>
-        <button id="tweetBtn" class="small">Partager</button>
-      </div>
+<h2>📖 Verset Biblique</h2>
 
-      <div class="settings">
-        <label title="Intervalle de rotation automatique">Intervalle: <span id="intervalLabel">12</span>s</label>
-        <input id="intervalRange" type="range" min="5" max="60" value="12" />
-        <label><input id="autoToggle" type="checkbox" checked /> Auto</label>
-        <label><input id="apiToggle" type="checkbox" checked /> Utiliser API (JSON local)</label>
-      </div>
+<div id="verset-box">
+    <p id="verset">Chargement...</p>
+    <h4 id="reference"></h4>
+</div>
 
-      <div class="meta">
-        <span id="quoteCount">0 versets locaux</span>
-      </div>
+<button onclick="randomVerse()">Nouveau verset</button>
 
-      <footer>
-        Déployez gratuitement: GitHub Pages ou Netlify.
-      </footer>
-    </div>
-  </div>
+<h3>Partager</h3>
+<button onclick="shareWhatsapp()">WhatsApp</button>
+<button onclick="shareFacebook()">Facebook</button>
+<button onclick="shareTwitter()">Twitter</button>
 
-  <script>
-  const AUTO_START = true;
-  const AUTO_INTERVAL_DEFAULT = 12000;
+<script>
+async function randomVerse() {
+    // Liste simplifiée des livres (tu peux compléter plus tard)
+    const books = ["genese","exode","levitique","nombre","deuteronome",
+    "matthieu","marc","luc","jean","romains","1corinthiens","2corinthiens",
+    "galates","ephesiens","philippiens","colossiens","hebreux","jacques",
+    "1pierre","2pierre","1jean","2jean","3jean","apocalypse"];
 
-  let LOCAL_QUOTES = [];
+    const book = books[Math.floor(Math.random() * books.length)];
+    const verseNumber = Math.ceil(Math.random() * 30); // simplification: max 30 versets par chapitre
+    const url = `https://bible-api.com/${book}+${verseNumber}:1?translation=lsg`;
 
-  const qText = document.getElementById('quoteText');
-  const qAuthor = document.getElementById('quoteAuthor');
-  const newBtn = document.getElementById('newBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const copyBtn = document.getElementById('copyBtn');
-  const tweetBtn = document.getElementById('tweetBtn');
-  const whatsappBtn = document.getElementById('whatsappBtn');
-  const intervalRange = document.getElementById('intervalRange');
-  const intervalLabel = document.getElementById('intervalLabel');
-  const autoToggle = document.getElementById('autoToggle');
-  const apiToggle = document.getElementById('apiToggle');
-  const quoteCount = document.getElementById('quoteCount');
-
-  let current = null;
-  let timer = null;
-  let auto = AUTO_START;
-  let intervalMs = AUTO_INTERVAL_DEFAULT;
-
-  async function loadBibleJson(){
-    try{
-      const res = await fetch('bible.json');
-      if(!res.ok) throw new Error('Impossible de charger bible.json');
-      LOCAL_QUOTES = await res.json();
-      quoteCount.textContent = `${LOCAL_QUOTES.length} versets locaux`;
-    }catch(e){
-      console.warn('Erreur de chargement de bible.json', e);
-      LOCAL_QUOTES = [];
-      quoteCount.textContent = '0 versets locaux';
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        document.getElementById("verset").innerText = data.text;
+        document.getElementById("reference").innerText = data.reference;
+    } catch (error) {
+        document.getElementById("verset").innerText = "Impossible de charger le verset.";
+        document.getElementById("reference").innerText = "";
     }
-  }
+}
 
-  function pickLocal(){
-    if(LOCAL_QUOTES.length===0) return {text:'Aucun verset local disponible', author:''};
-    const i = Math.floor(Math.random() * LOCAL_QUOTES.length);
-    return LOCAL_QUOTES[i];
-  }
+// Boutons de partage
+function shareWhatsapp() {
+    window.open("https://wa.me/?text=" + encodeURIComponent(document.getElementById("verset").innerText));
+}
+function shareFacebook() {
+    window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(location.href));
+}
+function shareTwitter() {
+    window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(document.getElementById("verset").innerText));
+}
 
-  async function showRandom(){
-    if(apiToggle.checked){
-      const quote = pickLocal();
-      if(quote){ setQuote(quote); return; }
-    }
-    setQuote(pickLocal());
-  }
+// Affiche un verset dès le chargement
+randomVerse();
+</script>
 
-  function setQuote(q){
-    current = q;
-    qText.classList.remove('fade-enter-active');
-    qText.classList.add('fade-enter');
-    qText.textContent = `"${q.text}"`;
-    qAuthor.textContent = q.author ? `— ${q.author}` : '';
-    requestAnimationFrame(()=>{
-      qText.classList.remove('fade-enter');
-      qText.classList.add('fade-enter-active');
-    });
-  }
-
-  function startTimer(){ stopTimer(); if(!auto) return; timer=setInterval(showRandom, intervalMs); pauseBtn.textContent='Pause'; }
-  function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
-
-  (async()=>{ await loadBibleJson(); intervalLabel.textContent=intervalRange.value; intervalMs=parseInt(intervalRange.value,10)*1000; auto=autoToggle.checked=AUTO_START; await showRandom(); if(auto) startTimer(); })();
-
-  newBtn.addEventListener('click', showRandom);
-  pauseBtn.addEventListener('click', ()=>{ if(timer){ stopTimer(); pauseBtn.textContent='Reprendre'; } else{ startTimer(); } });
-  copyBtn.addEventListener('click', ()=>{ if(!current) return; navigator.clipboard.writeText(`${current.text} — ${current.author||'Anonyme'}`); });
-  whatsappBtn.addEventListener('click', ()=>{ if(!current) return; window.open(`https://wa.me/?text=${encodeURIComponent(`"${current.text}" — ${current.author||'Anonyme'}`)}`, '_blank'); });
-  tweetBtn.addEventListener('click', ()=>{ if(!current) return; window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${current.text}" — ${current.author||'Anonyme'}`)}`, '_blank'); });
-  intervalRange.addEventListener('input', (e)=>{ intervalLabel.textContent=e.target.value; intervalMs=parseInt(e.target.value,10)*1000; startTimer(); });
-  autoToggle.addEventListener('change', (e)=>{ auto=e.target.checked;if(auto) startTimer();else stopTimer(); });
-  apiToggle.addEventListener('change', ()=>{});
-  document.addEventListener('keydown',(e)=>{ if(e.code==='Space'){ e.preventDefault(); showRandom(); } });
-  </script>
 </body>
 </html>
